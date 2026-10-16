@@ -53,7 +53,7 @@ footer{text-align:center;color:var(--mut);font-size:.9rem;padding:10px 20px 50px
 <body>
 <header><div class="logo"><i>◈</i> LuaForge</div><button id="th" aria-label="Changer de thème">◑</button></header>
 <section class="hero"><div class="blob b1"></div><div class="blob b2"></div>
-  <div class="hc"><span class="pill">Leaderstats & pseudos · scripts Lua prêts à coller</span>
+  <div class="hc"><span class="pill">Interfaces stylées, leaderstats & pseudos · scripts Lua prêts à coller</span>
   <h1>Tous tes scripts Roblox, <span class="grad">générés</span> en 10 secondes.</h1>
   <p>Choisis un outil, règle les options, copie le script dans Roblox Studio. Pas de code à assembler.</p></div>
 </section>
@@ -75,11 +75,283 @@ const lines=s=>String(s).split('\n').map(x=>x.trim()).filter(Boolean),q=s=>JSON.
 const kv=s=>lines(s).map(l=>{const i=l.lastIndexOf(':');return i<0?[l,0]:[l.slice(0,i).trim(),+l.slice(i+1)||0]});
 const fp=p=>p>=.1?(p*100).toFixed(1)+'%':p>0?(p*100).toPrecision(2)+'%':'0%';
 const rar=v=>kv(v.r).map(([n,w],i)=>[n,i?w*v.luck:w]);
+const P={'Néon violet':['#8b5cf6','#06b6d4','#0f0a1e'],'Océan':['#38bdf8','#2563eb','#07111f'],'Sunset':['#fb7185','#f59e0b','#1a0b10'],'Menthe':['#34d399','#22d3ee','#06150f'],'Or noir':['#fbbf24','#f97316','#12100a']},PO=Object.keys(P),pc=v=>P[v.pre]||P['Néon violet'],hx=c=>`Color3.fromHex("${c}")`;
 const FN={FredokaOne:["'Fredoka One'",400],GothamBlack:['Montserrat',900],GothamBold:['Montserrat',700],Bangers:['Bangers',400],LuckiestGuy:["'Luckiest Guy'",400],PermanentMarker:["'Permanent Marker'",400],Creepster:['Creepster',400],SpecialElite:["'Special Elite'",400],Oswald:['Oswald',700],Nunito:['Nunito',800],PatrickHand:["'Patrick Hand'",400],Michroma:['Michroma',400],DenkOne:["'Denk One'",400],Jura:['Jura',700],Kalam:['Kalam',700],Fondamento:['Fondamento',400]},PF=Object.keys(FN);
 const ST=[['coins','Coins','💰',1],['gems','Gems','💎',0],['kills','Kills','⚔️',1],['deaths','Deaths','💀',1],['wins','Wins','🏆',0],['level','Level','⭐',1],['xp','XP','📈',0],['rebirths','Rebirths','🔁',0],['time','Minutes','⏱️',1]];
 const prev=(v,txt)=>{const[f,w]=FN[v.font]||['sans-serif',700];return `<div style="padding:34px 12px;border-radius:18px;background:linear-gradient(135deg,#1c1b2e,#0b0a14);text-align:center"><span style="font:${w} ${v.size*1.5}px ${f},sans-serif;color:${v.col};${v.stroke?`-webkit-text-stroke:2px ${v.stk};paint-order:stroke fill;`:''}${v.bg?'background:#0009;padding:4px 18px;border-radius:99px;':''}">${esc(txt)}</span></div><small>Aperçu en direct · Enum.Font.${v.font}</small>`};
 const NF=[{k:'font',l:'Police',t:'s',o:PF,d:'FredokaOne'},{k:'size',l:'Taille du texte',t:'n',d:22},{k:'col',l:'Couleur du texte',t:'k',d:'#ffffff'},{k:'stroke',l:'Contour',t:'c',d:true},{k:'stk',l:'Couleur du contour',t:'k',d:'#000000'},{k:'bg',l:'Fond arrondi derrière le pseudo',t:'c',d:false}];
 const tools=[
+{id:'ui',i:'🎨',t:'Menu stylé (UI)',d:'Panneau moderne : dégradé, contour lumineux, animation d\'ouverture, boutons avec hover, drag et flou. Aperçu en direct.',w:'📍 LocalScript dans StarterPlayerScripts',
+f:[{k:'title',l:'Titre',t:'t',d:'Boutique'},{k:'sub',l:'Sous-titre',t:'t',d:'Choisis ton équipement'},{k:'pre',l:'Thème',t:'s',o:PO,d:'Néon violet'},{k:'btns',l:'Boutons (un par ligne)',t:'a',d:'Jouer\nBoutique\nParamètres'},{k:'rad',l:'Arrondi des coins',t:'n',d:18},{k:'key',l:'Touche d\'ouverture (Enum.KeyCode)',t:'t',d:'M'},{k:'blur',l:'Flou d\'arrière-plan',t:'c',d:true},{k:'drag',l:'Panneau déplaçable',t:'c',d:true}],
+n:v=>{const[a,b,c]=pc(v);return `<div style="padding:18px;border-radius:${v.rad+4}px;background:linear-gradient(180deg,${c},#000);border:1px solid ${a}66;box-shadow:0 0 34px ${a}40;margin-bottom:4px"><b style="font-size:1.25rem;color:#fff">${esc(v.title)}</b><div style="color:#aaa;font-size:.8rem;margin-bottom:10px">${esc(v.sub)}</div>${lines(v.btns).slice(0,6).map(x=>`<div style="padding:9px;margin-top:8px;border-radius:${Math.max(v.rad-4,0)}px;background:linear-gradient(90deg,${a},${b});color:#fff;text-align:center;font-weight:500">${esc(x)}</div>`).join('')}</div><small>Aperçu en direct</small>`},
+g:v=>{const[a,b,c]=pc(v),n=lines(v.btns);return `-- LocalScript : StarterPlayer/StarterPlayerScripts/StyledMenu
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local ACCENT, ACCENT2, BG = ${hx(a)}, ${hx(b)}, ${hx(c)}
+local KEY = Enum.KeyCode.${v.key}
+local RADIUS = ${v.rad}
+local OPEN = TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+local FAST = TweenInfo.new(0.15, Enum.EasingStyle.Quad)
+local BUTTONS = { ${n.map(q).join(', ')} }
+local WHITE = Color3.new(1, 1, 1)
+
+local function make(class, props, parent)
+  local o = Instance.new(class)
+  for k, val in pairs(props) do o[k] = val end
+  o.Parent = parent
+  return o
+end
+
+local gui = make("ScreenGui", { Name = "StyledMenu", ResetOnSpawn = false }, player:WaitForChild("PlayerGui"))
+local panel = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(380, ${120+52*n.length}), BackgroundColor3 = WHITE, Visible = false }, gui)
+make("UICorner", { CornerRadius = UDim.new(0, RADIUS) }, panel)
+make("UIStroke", { Color = ACCENT, Thickness = 1.5, Transparency = 0.3 }, panel)
+make("UIGradient", { Rotation = 90, Color = ColorSequence.new(BG:Lerp(ACCENT, 0.18), BG) }, panel)
+local scale = make("UIScale", { Scale = 0.85 }, panel)
+
+make("TextLabel", { Text = ${q(v.title)}, Font = Enum.Font.GothamBold, TextSize = 26, TextColor3 = WHITE, TextXAlignment = Enum.TextXAlignment.Left, BackgroundTransparency = 1, Position = UDim2.fromOffset(24, 18), Size = UDim2.new(1, -80, 0, 30) }, panel)
+make("TextLabel", { Text = ${q(v.sub)}, Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(170, 170, 190), TextXAlignment = Enum.TextXAlignment.Left, BackgroundTransparency = 1, Position = UDim2.fromOffset(24, 50), Size = UDim2.new(1, -80, 0, 20) }, panel)
+
+local close = make("TextButton", { Text = "✕", Font = Enum.Font.GothamBold, TextSize = 18, TextColor3 = WHITE, BackgroundColor3 = WHITE, BackgroundTransparency = 0.9, Position = UDim2.new(1, -52, 0, 18), Size = UDim2.fromOffset(32, 32) }, panel)
+make("UICorner", { CornerRadius = UDim.new(1, 0) }, close)
+
+local list = make("Frame", { Position = UDim2.fromOffset(24, 96), Size = UDim2.new(1, -48, 0, ${52*n.length}), BackgroundTransparency = 1 }, panel)
+make("UIListLayout", { Padding = UDim.new(0, 10) }, list)
+for _, name in ipairs(BUTTONS) do
+  local btn = make("TextButton", { Size = UDim2.new(1, 0, 0, 42), AutoButtonColor = false, BackgroundColor3 = WHITE, Text = name, Font = Enum.Font.GothamMedium, TextSize = 16, TextColor3 = WHITE }, list)
+  make("UICorner", { CornerRadius = UDim.new(0, math.max(RADIUS - 4, 0)) }, btn)
+  make("UIGradient", { Color = ColorSequence.new(ACCENT, ACCENT2) }, btn)
+  local s = make("UIScale", {}, btn)
+  btn.MouseEnter:Connect(function() TweenService:Create(s, FAST, { Scale = 1.04 }):Play() end)
+  btn.MouseLeave:Connect(function() TweenService:Create(s, FAST, { Scale = 1 }):Play() end)
+  btn.Activated:Connect(function() print("Clic :", name) end) -- remplace par ton action
+end
+
+local launcher = make("TextButton", { Text = "☰", Font = Enum.Font.GothamBold, TextSize = 22, TextColor3 = WHITE, BackgroundColor3 = WHITE, AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 20, 0.5, 0), Size = UDim2.fromOffset(48, 48) }, gui)
+make("UICorner", { CornerRadius = UDim.new(1, 0) }, launcher)
+make("UIGradient", { Rotation = 45, Color = ColorSequence.new(ACCENT, ACCENT2) }, launcher)
+${v.blur?'\nlocal blur = make("BlurEffect", { Size = 0 }, Lighting)\n':''}
+local isOpen = false
+local function toggle()
+  isOpen = not isOpen
+  if isOpen then panel.Visible = true end
+  TweenService:Create(scale, OPEN, { Scale = isOpen and 1 or 0.85 }):Play()
+${v.blur?'  TweenService:Create(blur, FAST, { Size = isOpen and 18 or 0 }):Play()\n':''}  if not isOpen then
+    task.delay(0.25, function() if not isOpen then panel.Visible = false end end)
+  end
+end
+
+launcher.Activated:Connect(toggle)
+close.Activated:Connect(function() if isOpen then toggle() end end)
+UIS.InputBegan:Connect(function(input, processed)
+  if not processed and input.KeyCode == KEY then toggle() end
+end)
+${v.drag?`
+local dragging, startInput, startPos = false, nil, nil
+panel.InputBegan:Connect(function(input)
+  if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+    dragging, startInput, startPos = true, input.Position, panel.Position
+    input.Changed:Connect(function()
+      if input.UserInputState == Enum.UserInputState.End then dragging = false end
+    end)
+  end
+end)
+UIS.InputChanged:Connect(function(input)
+  if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    local d = input.Position - startInput
+    panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+  end
+end)
+`:''}`}},
+{id:'toast',i:'🔔',t:'Notifications stylées',d:'Cartes qui glissent à l\'écran avec barre d\'accent. Appelle Notify.show(titre, texte).',w:'📍 ModuleScript dans ReplicatedStorage (nommé Notify)',
+f:[{k:'pos',l:'Position',t:'s',o:['Haut droite','Haut gauche','Bas droite','Bas gauche'],d:'Haut droite'},{k:'pre',l:'Thème',t:'s',o:PO,d:'Néon violet'},{k:'dur',l:'Durée d\'affichage (s)',t:'n',d:4}],
+g:v=>{const[a,b,c]=pc(v),top=v.pos.startsWith('Haut'),right=v.pos.endsWith('droite');return `-- ModuleScript : ReplicatedStorage/Notify (utilisation côté client)
+-- local Notify = require(game.ReplicatedStorage.Notify) ; Notify.show("Titre", "Message")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local DURATION = ${v.dur}
+local ACCENT, BG = ${hx(a)}, ${hx(c)}
+local OFFSET = ${right?320:-320}
+local SLIDE = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+
+local function make(class, props, parent)
+  local o = Instance.new(class)
+  for k, val in pairs(props) do o[k] = val end
+  o.Parent = parent
+  return o
+end
+
+local gui = make("ScreenGui", { Name = "Notify", ResetOnSpawn = false }, Players.LocalPlayer:WaitForChild("PlayerGui"))
+local holder = make("Frame", { AnchorPoint = Vector2.new(${right?1:0}, ${top?0:1}), Position = UDim2.new(${right?1:0}, ${right?-20:20}, ${top?0:1}, ${top?20:-20}), Size = UDim2.fromOffset(320, 500), BackgroundTransparency = 1 }, gui)
+make("UIListLayout", { Padding = UDim.new(0, 10), VerticalAlignment = Enum.VerticalAlignment.${top?'Top':'Bottom'}, HorizontalAlignment = Enum.HorizontalAlignment.${right?'Right':'Left'} }, holder)
+
+local M = {}
+local order = 0
+
+function M.show(title, text)
+  order += 1
+  local slot = make("Frame", { Size = UDim2.fromOffset(300, 66), BackgroundTransparency = 1, LayoutOrder = ${top?'order':'-order'} }, holder)
+  local card = make("Frame", { Size = UDim2.fromScale(1, 1), Position = UDim2.fromOffset(OFFSET, 0), BackgroundColor3 = BG }, slot)
+  make("UICorner", { CornerRadius = UDim.new(0, 14) }, card)
+  make("UIStroke", { Color = ACCENT, Transparency = 0.4 }, card)
+  local bar = make("Frame", { Size = UDim2.new(0, 4, 1, -20), Position = UDim2.fromOffset(10, 10), BackgroundColor3 = ACCENT, BorderSizePixel = 0 }, card)
+  make("UICorner", { CornerRadius = UDim.new(1, 0) }, bar)
+  make("TextLabel", { Text = title, Font = Enum.Font.GothamBold, TextSize = 16, TextColor3 = Color3.new(1, 1, 1), TextXAlignment = Enum.TextXAlignment.Left, BackgroundTransparency = 1, Position = UDim2.fromOffset(26, 10), Size = UDim2.new(1, -36, 0, 20) }, card)
+  make("TextLabel", { Text = text, Font = Enum.Font.Gotham, TextSize = 14, TextColor3 = Color3.fromRGB(170, 170, 190), TextXAlignment = Enum.TextXAlignment.Left, TextWrapped = true, BackgroundTransparency = 1, Position = UDim2.fromOffset(26, 32), Size = UDim2.new(1, -36, 0, 28) }, card)
+
+  TweenService:Create(card, SLIDE, { Position = UDim2.fromOffset(0, 0) }):Play()
+  task.delay(DURATION, function()
+    local out = TweenService:Create(card, TweenInfo.new(0.3), { Position = UDim2.fromOffset(OFFSET, 0) })
+    out:Play()
+    out.Completed:Wait()
+    slot:Destroy()
+  end)
+end
+
+return M`}},
+{id:'hud',i:'❤️',t:'HUD vie & mana',d:'Barres animées avec dégradé et contour. La mana lit les attributs Mana / MaxMana du joueur.',w:'📍 LocalScript dans StarterPlayerScripts',
+f:[{k:'pre',l:'Thème (mana)',t:'s',o:PO,d:'Néon violet'},{k:'mana',l:'Afficher la barre de mana',t:'c',d:true},{k:'w',l:'Largeur des barres',t:'n',d:300}],
+g:v=>{const[a,b,c]=pc(v);return `-- LocalScript : StarterPlayer/StarterPlayerScripts/Hud
+-- Mana : player:SetAttribute("Mana", 50) et player:SetAttribute("MaxMana", 100) côté serveur
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local ACCENT, ACCENT2, BG = ${hx(a)}, ${hx(b)}, ${hx(c)}
+local WIDTH = ${v.w}
+local TI = TweenInfo.new(0.25, Enum.EasingStyle.Quad)
+local WHITE = Color3.new(1, 1, 1)
+
+local function make(class, props, parent)
+  local o = Instance.new(class)
+  for k, val in pairs(props) do o[k] = val end
+  o.Parent = parent
+  return o
+end
+
+local gui = make("ScreenGui", { Name = "Hud", ResetOnSpawn = false }, player:WaitForChild("PlayerGui"))
+
+local function bar(y, c1, c2, label)
+  local back = make("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, y), Size = UDim2.fromOffset(WIDTH, 22), BackgroundColor3 = BG, BackgroundTransparency = 0.15 }, gui)
+  make("UICorner", { CornerRadius = UDim.new(1, 0) }, back)
+  make("UIStroke", { Color = c1, Transparency = 0.5 }, back)
+  local fill = make("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = WHITE }, back)
+  make("UICorner", { CornerRadius = UDim.new(1, 0) }, fill)
+  make("UIGradient", { Color = ColorSequence.new(c1, c2) }, fill)
+  local text = make("TextLabel", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 13, TextColor3 = WHITE, ZIndex = 2 }, back)
+  return function(value, max)
+    value = math.clamp(value, 0, max)
+    TweenService:Create(fill, TI, { Size = UDim2.fromScale(max > 0 and value / max or 0, 1) }):Play()
+    text.Text = label .. " " .. math.floor(value) .. " / " .. math.floor(max)
+  end
+end
+
+local setHealth = bar(-20, Color3.fromRGB(255, 80, 100), Color3.fromRGB(255, 150, 80), "PV")
+
+local function bindHumanoid(char)
+  local hum = char:WaitForChild("Humanoid")
+  setHealth(hum.Health, hum.MaxHealth)
+  hum.HealthChanged:Connect(function() setHealth(hum.Health, hum.MaxHealth) end)
+end
+if player.Character then task.spawn(bindHumanoid, player.Character) end
+player.CharacterAdded:Connect(bindHumanoid)
+${v.mana?`
+local setMana = bar(-52, ACCENT, ACCENT2, "Mana")
+local function refreshMana()
+  setMana(player:GetAttribute("Mana") or 0, player:GetAttribute("MaxMana") or 100)
+end
+player:GetAttributeChangedSignal("Mana"):Connect(refreshMana)
+player:GetAttributeChangedSignal("MaxMana"):Connect(refreshMana)
+refreshMana()
+`:''}`}},
+{id:'load',i:'⏳',t:'Écran de chargement',d:'Chargement plein écran avec dégradé, astuce aléatoire, barre de progression et fondu de sortie.',w:'📍 LocalScript dans ReplicatedFirst',
+f:[{k:'title',l:'Titre du jeu',t:'t',d:'Mon Jeu'},{k:'tips',l:'Astuces (une par ligne)',t:'a',d:'Ramasse les pièces pour monter de niveau\nAstuce : explore toute la map !\nInvite tes amis pour gagner un bonus'},{k:'min',l:'Durée minimale (s)',t:'n',d:4},{k:'pre',l:'Thème',t:'s',o:PO,d:'Néon violet'}],
+g:v=>{const[a,b,c]=pc(v);return `-- LocalScript : ReplicatedFirst/LoadingScreen
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+ReplicatedFirst:RemoveDefaultLoadingScreen()
+
+local ACCENT, ACCENT2, BG = ${hx(a)}, ${hx(b)}, ${hx(c)}
+local MIN_TIME = ${v.min}
+local TIPS = { ${lines(v.tips).map(q).join(', ')} }
+local WHITE = Color3.new(1, 1, 1)
+
+local function make(class, props, parent)
+  local o = Instance.new(class)
+  for k, val in pairs(props) do o[k] = val end
+  o.Parent = parent
+  return o
+end
+
+local gui = make("ScreenGui", { Name = "Loading", IgnoreGuiInset = true, ResetOnSpawn = false, DisplayOrder = 100 }, Players.LocalPlayer:WaitForChild("PlayerGui"))
+local root = make("CanvasGroup", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = WHITE }, gui)
+make("UIGradient", { Rotation = 135, Color = ColorSequence.new(BG, BG:Lerp(ACCENT, 0.3)) }, root)
+
+make("TextLabel", { Text = ${q(v.title)}, Font = Enum.Font.GothamBlack, TextSize = 64, TextColor3 = WHITE, BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.42), Size = UDim2.fromOffset(700, 80) }, root)
+make("TextLabel", { Text = TIPS[math.random(#TIPS)] or "", Font = Enum.Font.Gotham, TextSize = 18, TextColor3 = Color3.fromRGB(190, 190, 210), BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.52), Size = UDim2.fromOffset(700, 30) }, root)
+
+local back = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.62), Size = UDim2.fromOffset(360, 10), BackgroundColor3 = WHITE, BackgroundTransparency = 0.88 }, root)
+make("UICorner", { CornerRadius = UDim.new(1, 0) }, back)
+local fill = make("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = WHITE }, back)
+make("UICorner", { CornerRadius = UDim.new(1, 0) }, fill)
+make("UIGradient", { Color = ColorSequence.new(ACCENT, ACCENT2) }, fill)
+
+local start = os.clock()
+while os.clock() - start < MIN_TIME or not game:IsLoaded() do
+  local progress = math.min((os.clock() - start) / MIN_TIME, 0.95)
+  fill.Size = UDim2.fromScale(progress, 1)
+  task.wait()
+end
+fill.Size = UDim2.fromScale(1, 1)
+task.wait(0.3)
+
+local fade = TweenService:Create(root, TweenInfo.new(0.8), { GroupTransparency = 1 })
+fade:Play()
+fade.Completed:Wait()
+gui:Destroy()`}},
+{id:'menu',i:'🏠',t:'Menu principal',d:'Écran d\'accueil plein écran avec gros titre, bouton Jouer animé et fondu.',w:'📍 LocalScript dans StarterPlayerScripts',
+f:[{k:'title',l:'Titre',t:'t',d:'MON JEU'},{k:'sub',l:'Sous-titre',t:'t',d:'Survis le plus longtemps possible'},{k:'play',l:'Texte du bouton',t:'t',d:'JOUER'},{k:'pre',l:'Thème',t:'s',o:PO,d:'Néon violet'}],
+g:v=>{const[a,b,c]=pc(v);return `-- LocalScript : StarterPlayer/StarterPlayerScripts/MainMenu
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local ACCENT, ACCENT2, BG = ${hx(a)}, ${hx(b)}, ${hx(c)}
+local WHITE = Color3.new(1, 1, 1)
+
+local function make(class, props, parent)
+  local o = Instance.new(class)
+  for k, val in pairs(props) do o[k] = val end
+  o.Parent = parent
+  return o
+end
+
+local gui = make("ScreenGui", { Name = "MainMenu", IgnoreGuiInset = true, ResetOnSpawn = false, DisplayOrder = 50 }, Players.LocalPlayer:WaitForChild("PlayerGui"))
+local root = make("CanvasGroup", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = WHITE }, gui)
+make("UIGradient", { Rotation = 160, Color = ColorSequence.new(BG, BG:Lerp(ACCENT, 0.35)) }, root)
+
+make("TextLabel", { Text = ${q(v.title)}, Font = Enum.Font.GothamBlack, TextSize = 84, TextColor3 = WHITE, BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.35), Size = UDim2.fromOffset(800, 100) }, root)
+make("TextLabel", { Text = ${q(v.sub)}, Font = Enum.Font.Gotham, TextSize = 22, TextColor3 = Color3.fromRGB(190, 190, 210), BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(800, 30) }, root)
+
+local button = make("TextButton", { Text = ${q(v.play)}, Font = Enum.Font.GothamBold, TextSize = 24, TextColor3 = WHITE, AutoButtonColor = false, BackgroundColor3 = WHITE, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.6), Size = UDim2.fromOffset(240, 60) }, root)
+make("UICorner", { CornerRadius = UDim.new(1, 0) }, button)
+make("UIGradient", { Color = ColorSequence.new(ACCENT, ACCENT2) }, button)
+local scale = make("UIScale", {}, button)
+button.MouseEnter:Connect(function() TweenService:Create(scale, TweenInfo.new(0.15), { Scale = 1.08 }):Play() end)
+button.MouseLeave:Connect(function() TweenService:Create(scale, TweenInfo.new(0.15), { Scale = 1 }):Play() end)
+
+button.Activated:Connect(function()
+  local fade = TweenService:Create(root, TweenInfo.new(0.6), { GroupTransparency = 1 })
+  fade:Play()
+  fade.Completed:Wait()
+  gui:Destroy()
+end)`}},
 {id:'stats',i:'🏆',t:'Leaderstats',d:'Choisis tes stats principales : création, sauvegarde DataStore, kills/morts et temps de jeu automatiques.',w:'📍 Script dans ServerScriptService',
 f:[...ST.map(([k,n,e,d])=>({k:'s_'+k,l:e+' '+n,t:'c',d:!!d})),{k:'name',l:'Nom du DataStore',t:'t',d:'Stats_v1'},{k:'auto',l:'Autosave (secondes)',t:'n',d:120}],
 n:v=>{const on=ST.filter(s=>v['s_'+s[0]]);return `<small>${on.length} stat(s) : ${on.map(s=>s[2]+' '+s[1]).join(' · ')||'aucune'}</small>`},
